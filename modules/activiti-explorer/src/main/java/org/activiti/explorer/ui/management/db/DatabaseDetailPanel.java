@@ -41,10 +41,13 @@ public class DatabaseDetailPanel extends DetailPanel {
   
   protected transient ManagementService managementService;
   protected I18nManager i18nManager;
-  
+
   protected String tableName;
-  
-  
+
+  private static final String TABLE_USER_ID = "ACT_ID_USER";
+
+  private static final String USER_PASSWORD_COLUMN = "PWD_";
+
   public DatabaseDetailPanel(String tableName) {
     this.tableName = tableName;
     this.managementService = ProcessEngines.getDefaultProcessEngine().getManagementService();
@@ -105,13 +108,17 @@ public class DatabaseDetailPanel extends DetailPanel {
       data.setHeight(100, UNITS_PERCENTAGE);
       data.addStyleName(ExplorerLayout.STYLE_DATABASE_TABLE);
       setDetailExpandRatio(data, 1.0f);
-      
+
       // Create column headers
       TableMetaData metaData = managementService.getTableMetaData(tableName);
       for (String columnName : metaData.getColumnNames()) {
+        // ignore password columns to avoid user see the values on UI
+        if (tableName.equals(TABLE_USER_ID) && columnName.equals(USER_PASSWORD_COLUMN)) {
+          continue;
+        }
         data.addContainerProperty(columnName, String.class, null);
       }
-      
+
     } else {
       Label noDataLabel = new Label(i18nManager.getMessage(Messages.DATABASE_NO_ROWS));
       noDataLabel.addStyleName(Reindeer.LABEL_SMALL);
